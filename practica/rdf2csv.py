@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 
 import re
 import csv
@@ -10,15 +9,21 @@ allrest = []
 
 
 class Restaurant(object):
-    owner = ""
-    email = ""
-    url = ""
+    name = ""
+    address = ""
+    locality = ""
+    region = ""
+    country_name = ""
     phone1 = ""
     phone2 = ""
-    address = ""
+    url = ""
+    email = ""
+    owner = ""
     neighborhood = ""
     postal_code = ""
     district = ""
+    latitude = ""
+    longitude = ""
 
 
 class MHTMLParser(HTMLParser):
