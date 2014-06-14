@@ -75,17 +75,27 @@ class MHTMLParser(HTMLParser):
             elif re.match("[A-Z]+\s?", data):
                 self.crest.owner = " ".join(re.findall("[A-Z]+", data))
 
-f = open('restaurants.rdf', 'rb')
-rdfSource = f.read()
-f.close()
 
-parser = MHTMLParser()
-parser.feed(rdfSource)
+def convert_to_csv(filename):
+    try:
+        f = open(filename + '.rdf', 'rb')
+    except:
+        print "The file '%s' doesn't exist" % (filename)
+        return
+    rdfSource = f.read()
+    f.close()
 
-nf = open('restaurants.csv', 'wb')
-csvfile = csv.writer(nf)
+    parser = MHTMLParser()
+    parser.feed(rdfSource)
 
-csvfile.writerow(["Name"] + ["Address"] + ["Locality"] + ["Region"] + ["Country_name"] + ["Phone1"] + ["Phone2"] + ["Url"] + ["Email"] + ["Owner"] + ["Neighborhood"] + ["Postal_code"] + ["District"] + ["Latitude"] + ["Longitude"])
-for x in allrest:
-    csvfile.writerow([x.name] + [x.address] + [x.locality] + [x.region] + [x.country_name] + [x.phone1] + [x.phone2] + [x.url] + [x.email] + [x.owner] + [x.neighborhood] + [x.postal_code] + [x.district] + [x.latitude] + [x.longitude])
-nf.close()
+    nf = open(filename + '.csv', 'wb')
+    csvfile = csv.writer(nf)
+
+    csvfile.writerow(["Name"] + ["Address"] + ["Locality"] + ["Region"] + ["Country_name"] + ["Phone1"] + ["Phone2"] + ["Url"] + ["Email"] + ["Owner"] + ["Neighborhood"] + ["Postal_code"] + ["District"] + ["Latitude"] + ["Longitude"])
+    for x in allrest:
+        csvfile.writerow([x.name] + [x.address] + [x.locality] + [x.region] + [x.country_name] + [x.phone1] + [x.phone2] + [x.url] + [x.email] + [x.owner] + [x.neighborhood] + [x.postal_code] + [x.district] + [x.latitude] + [x.longitude])
+    nf.close()
+
+
+if __name__ == '__main__':
+    convert_to_csv("restaurants")
