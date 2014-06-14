@@ -25,6 +25,7 @@ var/
 documentacio
 *.db
 *.pdf
+*.csv
 
 # Installer logs
 pip-log.txt
