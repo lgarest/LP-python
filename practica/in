@@ -1,0 +1,7 @@
+'["Imagine", ["Bar", "Restaurant"]]'
+'("Imagine", ["Bar", "Restaurant"])'
+'["Burger King", "Doner"]'
+'["Imagine", ("Bar", "Rambla")]'
+['("A"', '"B")', '"Rambla"']
+['"Imagine"', '("Bar"', '"Rambla")']
+b = a[1:-1].split(', ',1)
