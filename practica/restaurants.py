@@ -1,20 +1,21 @@
 #!/usr/bin/python
-
 import csv
-import os as nos
-# import math
+import math
+import os as _os
 import re
+
 from collections import OrderedDict
 from rdf2csv import convert_to_csv, Restaurant
 
 # distancia (A, B) = R * arccos (sen (LATA) * sen (LATB) + cos (lata) * cos (LATB) * cos (LonA-LonB))
 
+# dict containing the restaurants
 restaurants = {}
 
 
 def csv_to_dict():
     """
-    Transforms the restaurants.csv into a dict with key, the name of the restaurant and value it's attributes
+    transforms the restaurants.csv file into a dict, with key as the name of the restaurant and value as it's attributes
     """
     try:
         csvfile = open('restaurants.csv', 'rb')
@@ -38,25 +39,27 @@ def csv_to_dict():
 
 
 def is_string(string):
-    re1 = r"[\"\']?\w+[\s\w*]*[\"\']?"
-    return re.match(re1, string) is not None
+    """ returns if the content of the string is a string """
+    return re.match(r"[\"\']?\w+[\s\w*]*[\"\']?", string) is not None
 
 
 def is_list(string):
+    """ returns if the content of the string is a list """
     if not isinstance(string, list):
         return re.match(r"[\'\"]?\[.*\][\'\"]?", string) is not None
     return False
 
 
 def is_tuple(string):
+    """ returns if the content of the string is a tuple """
     if not isinstance(string, tuple):
         return re.match(r"[\'\"]?\(.*\)[\'\"]?", string) is not None
     return False
 
 
 def matching(sentence, results, list_to_find=[]):
-    """
-    Returns a list matching the pattern 'sentence' into the list 'list_to_find'
+    """ *Recursive*
+    returns a list matching the pattern 'sentence' into the list 'list_to_find'
     """
     try:
         if not is_string(sentence):
@@ -64,18 +67,21 @@ def matching(sentence, results, list_to_find=[]):
     except:
         pass
     if isinstance(sentence, list):
+        # list type -> OR
         for elem in sentence:
             aux = matching(elem, {}, list_to_find)
             for a in aux:
                 results[a] = 1
         return results.keys()
     elif isinstance(sentence, tuple):
+        # tuple type -> AND
         aux = list_to_find
         for elem in sentence:
             aux = matching(elem, {}, aux)
             results = aux
         return results
     elif isinstance(sentence, str):
+        # string type -> search for the pattern
         a = search_for_word(sentence, list_to_find)
         return a
     else:
@@ -84,9 +90,7 @@ def matching(sentence, results, list_to_find=[]):
 
 
 def search_for_word(pattern, list):
-    """
-    Searchs for a pattern inside a list
-    """
+    """ searchs for a pattern inside a list """
     results = []
     try:
         # try to descompose the pattern string
@@ -102,18 +106,17 @@ def search_for_word(pattern, list):
 
 
 def find_restaurants(req_info, restaurants):
-    match_list = {}
-    matches = matching(req_info, match_list, restaurants)
-    # print "matches: %s" % (matches)
-    # print "matches: %s" % (len(matches))
+    """ Auxiliar function calling then matching function """
+    return matching(req_info, {}, restaurants)
 
 
 def main():
-    nos.system('ls')
     restaurants = csv_to_dict()
-    a = restaurants.keys()
-    input_str = str(raw_input("What is your request?: \n"))
-    find_restaurants(eval(input_str), a)
+    restaurants_names = restaurants.keys()
+    input_str = raw_input("What is your request?: \n")
+    requested_restaurants = find_restaurants(
+        eval(input_str), restaurants_names)
+    print "requested_restaurants: %s" % (requested_restaurants)
 
 if __name__ == '__main__':
     main()
