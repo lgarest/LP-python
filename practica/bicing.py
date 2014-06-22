@@ -80,7 +80,7 @@ class Stations(dict):
             v_lat, v_long = to_radians(v_lat), to_radians(v_long)
             distance = EARTH_RADIUS * math.acos(math.sin(lat) * math.sin(v_lat) + math.cos(lat) * math.cos(v_lat) * math.cos(lon - v_long))
             if distance <= radius:
-                v.distance = distance
+                v.distance = int(distance * 1000)
                 ret.append((s, v))
         return ret
 
