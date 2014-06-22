@@ -2,6 +2,11 @@
 
 import urllib2
 import xml.etree.ElementTree as ET
+import math
+
+
+def to_radians(a):
+    return float(a) * (math.pi / 180.0)
 
 
 class Station(object):
@@ -26,29 +31,58 @@ class Stations(dict):
     def __init__(self):
         super(Stations, self).__init__()
 
-    def available_stations(self):
+    def available(self):
         return [v for s, v in filter(
             lambda v: v[1].status == "OPN", self.items())]
 
-    def empty_stations(self):
+    def empty(self):
         return [v for s, v in filter(lambda v: v[1].bikes == 0, self.items())]
 
-    def full_stations(self):
+    def full(self):
         return [v for s, v in filter(
             lambda v: v[1].slots == 0, self.items())]
 
-    def stations_few_bikes(self):
+    def few_bikes(self, stations=None):
+        if not stations:
+            stations = self.items()
         return [v for s, v in filter(lambda v: v[1].bikes <= 5 and
-                v[1].bikes > 0, self.items())]
+                v[1].bikes > 0, stations)]
 
-    def stations_few_slots(self):
+    def with_bikes(self, stations=None):
+        if not stations:
+            stations = self.items()
+        return [v for s, v in filter(lambda v: v[1].bikes > 0, stations)]
+
+    def with_slots(self, stations=None):
+        if not stations:
+            stations = self.items()
+        return [v for s, v in filter(lambda v: v[1].slots > 0, stations)]
+
+    def few_slots(self, stations=None):
+        if not stations:
+            stations = self.items()
         return [v for s, v in filter(
-            lambda v: v[1].slots <= 5 and v[1].slots > 0, self.items())]
+            lambda v: v[1].slots <= 5 and v[1].slots > 0, stations)]
 
     def get_nearby(self, id=None):
         if not id:
             return []
         return self[id].nearbyStationList
+
+    def get_stations_within_radius(self, radius, lat, lon, stations=None):
+        if not stations:
+            stations = self.items()
+        EARTH_RADIUS = 6372.795477598
+        lat, lon = to_radians(lat), to_radians(lon)
+        ret = []
+        for s, v in stations:
+            v_lat, v_long = v.lat, v.long
+            v_lat, v_long = to_radians(v_lat), to_radians(v_long)
+            distance = EARTH_RADIUS * math.acos(math.sin(lat) * math.sin(v_lat) + math.cos(lat) * math.cos(v_lat) * math.cos(lon - v_long))
+            if distance <= radius:
+                v.distance = distance
+                ret.append((s, v))
+        return ret
 
 
 class Extractor(object):

@@ -1,13 +1,11 @@
 #!/usr/bin/python
 import csv
-import math
-import os as _os
+import os as _os  # security import
 import re
 
 from collections import OrderedDict
 from rdf2csv import convert_to_csv, Restaurant
-
-# distancia (A, B) = R * arccos (sen (LATA) * sen (LATB) + cos (lata) * cos (LATB) * cos (LonA-LonB))
+from bicing import get_stations
 
 # dict containing the restaurants
 restaurants = {}
@@ -82,14 +80,14 @@ def matching(sentence, results, list_to_find=[]):
         return results
     elif isinstance(sentence, str):
         # string type -> search for the pattern
-        a = search_for_word(sentence, list_to_find)
+        a = search_for_pattern_string(sentence, list_to_find)
         return a
     else:
         print "invalid format:", sentence
         return
 
 
-def search_for_word(pattern, list):
+def search_for_pattern_string(pattern, list):
     """ searchs for a pattern inside a list """
     results = []
     try:
@@ -105,9 +103,9 @@ def search_for_word(pattern, list):
     return results
 
 
-def find_restaurants(req_info, restaurants):
+def find_restaurants(request, list):
     """ Auxiliar function calling then matching function """
-    return matching(req_info, {}, restaurants)
+    return matching(request, {}, list)
 
 
 def main():
@@ -117,6 +115,20 @@ def main():
     requested_restaurants = find_restaurants(
         eval(input_str), restaurants_names)
     print "requested_restaurants: %s" % (requested_restaurants)
+    stations = get_stations()
+    rest_dict = {}
+    for r in requested_restaurants:
+        restaurant = restaurants[r]
+        rest_dict[r] = {}
+        # r = restaurants[r]
+        rest_dict[r]['restaurant'] = restaurant
+        nearby_stations = stations.get_stations_within_radius(
+            radius=1.,
+            lat=float(restaurant.latitude),
+            lon=float(restaurant.longitude))
+        ordered_stations = sorted(nearby_stations, key=lambda x: x[1].distance)
+        rest_dict[r]['with_slots'] = stations.with_slots(stations=ordered_stations)
+        rest_dict[r]['with_bikes'] = stations.with_bikes(stations=ordered_stations)
 
 if __name__ == '__main__':
     main()
