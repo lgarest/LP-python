@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 import csv
 import os as _os  # security import
 import re
@@ -6,6 +7,7 @@ import re
 from collections import OrderedDict
 from rdf2csv import convert_to_csv, Restaurant
 from bicing import get_stations
+from to_html import write_html
 
 # dict containing the restaurants
 restaurants = {}
@@ -18,7 +20,9 @@ def csv_to_dict():
     try:
         csvfile = open('restaurants.csv', 'rb')
     except:
+        print "converting the file '%s' to csv" % ('restaurants.csv')
         convert_to_csv('restaurants')
+        print "- file '%s' converted" % ('restaurants.csv')
         csvfile = open('restaurants.csv', 'rb')
     spamreader = csv.reader(csvfile)
     global_attributes = []
@@ -114,7 +118,6 @@ def main():
     input_str = raw_input("What is your request?: \n")
     requested_restaurants = find_restaurants(
         eval(input_str), restaurants_names)
-    print "requested_restaurants: %s" % (requested_restaurants)
     stations = get_stations()
     rest_dict = {}
     for r in requested_restaurants:
@@ -129,6 +132,14 @@ def main():
         ordered_stations = sorted(nearby_stations, key=lambda x: x[1].distance)
         rest_dict[r]['with_slots'] = stations.with_slots(stations=ordered_stations)
         rest_dict[r]['with_bikes'] = stations.with_bikes(stations=ordered_stations)
-
+    # print stations
+    write_html(
+        input=input_str,
+        requested=requested_restaurants,
+        stations=rest_dict)
+    input_str = raw_input("Do you want to open the file in the browser?: (y/n) \n")
+    if input_str == 'y':
+        import webbrowser
+        webbrowser.open('restaurants.html')
 if __name__ == '__main__':
     main()
